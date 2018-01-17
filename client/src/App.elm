@@ -3,6 +3,7 @@ module App exposing (..)
 import Html
     exposing
         ( Html
+        , beginnerProgram
         , div
         , text
         , section
@@ -33,8 +34,22 @@ import Html.Attributes
         )
 
 
-main : Html msg
+type alias Model =
+    {}
+
+
+main : Program Never Model msg
 main =
+    beginnerProgram { model = {}, update = update, view = view }
+
+
+update : msg -> Model -> Model
+update _ model =
+    model
+
+
+view : Model -> Html msg
+view _ =
     div []
         [ section [ class "todoapp" ]
             [ header [ class "header" ]
