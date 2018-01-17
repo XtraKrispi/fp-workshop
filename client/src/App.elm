@@ -35,11 +35,6 @@ import Html.Attributes
 
 main : Html msg
 main =
-    view
-
-
-view : Html msg
-view =
     div []
         [ section [ class "todoapp" ]
             [ header [ class "header" ]
