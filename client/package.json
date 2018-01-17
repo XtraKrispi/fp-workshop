@@ -14,9 +14,11 @@
     "gulp-json-srv": "^1.0.1",
     "gulp-plumber": "^1.1.0",
     "gulp-sass": "^3.1.0",
-    "lodash": "^4.17.4"
+    "lodash": "^4.17.4",
+    "gulp-rename": "^1.2.2"
   },
   "scripts": {
+    "intro": "gulp clean && gulp intro",
     "dev": "gulp clean && gulp dev",
     "build": "gulp clean && gulp build"
   },

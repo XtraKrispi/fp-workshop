@@ -1,5 +1,6 @@
 var gulp    = require('gulp');
 var elm     = require('gulp-elm');
+var rename  = require('gulp-rename');
 var plumber = require('gulp-plumber');
 var del     = require('del');
 var sass    = require('gulp-sass');
@@ -12,8 +13,10 @@ var jsonServer = require('gulp-json-srv').create({
 var paths = {
     dest: 'dist',
     elmApp: 'src/App.elm',
+    introApp: 'src/Intro.elm',
     elm: 'src/**/*.elm',
-    staticAssets: 'src/static/**/*.*',
+    staticAssets: 'src/static/index.html',
+    staticAssetsIntro: 'src/static/intro.html',
     css: 'node_modules/todomvc-app-css/index.css'
 };
 
@@ -27,6 +30,14 @@ gulp.task('elm', ['elm-init'], function(){
     return gulp.src(paths.elmApp)
         .pipe(plumber())
         .pipe(elm())
+        .pipe(gulp.dest(paths.dest))        
+        .pipe(browserSync.stream());
+});
+
+gulp.task('elm-intro', ['elm-init'], function(){
+    return gulp.src(paths.introApp)
+        .pipe(plumber())
+        .pipe(elm())
         .pipe(gulp.dest(paths.dest))
         .pipe(browserSync.stream());
 });
@@ -34,6 +45,13 @@ gulp.task('elm', ['elm-init'], function(){
 gulp.task('staticAssets', function(){
     return gulp.src(paths.staticAssets)
         .pipe(plumber())
+        .pipe(gulp.dest(paths.dest));
+});
+
+gulp.task('staticAssets-intro', function(){
+    return gulp.src(paths.staticAssetsIntro)
+        .pipe(plumber())
+        .pipe(rename("index.html"))
         .pipe(gulp.dest(paths.dest));
 });
 
@@ -53,6 +71,8 @@ gulp.task('browser-sync', function(){
 
 gulp.task('elm-watch', ['elm'], browserSync.reload);
 
+gulp.task('elm-watch-intro', ['elm-intro'], browserSync.reload);
+
 gulp.task('jsonServer', function(){
     return gulp.src('json-data.json')
         .pipe(jsonServer.pipe());
@@ -64,6 +84,14 @@ gulp.task('watch', ['browser-sync'], function(){
     gulp.watch(paths.staticAssets, ['staticAssets']).on('change', browserSync.reload);
 });
 
+gulp.task('watch-intro', ['browser-sync'], function(){
+    gulp.watch(["json-data.json"], ["jsonServer"]).on('change', browserSync.reload);
+    gulp.watch(paths.elm, ['elm-watch-intro']);
+    gulp.watch(paths.staticAssets, ['staticAssets']).on('change', browserSync.reload);
+});
+
 gulp.task('build', ['elm', 'staticAssets', 'css']);
+gulp.task('build-intro', ['elm-intro', 'staticAssets-intro']);
+gulp.task('intro', ['jsonServer', 'build-intro', 'watch-intro']);
 gulp.task('dev', ['jsonServer', 'build', 'watch']);
 gulp.task('default', ['build']);
