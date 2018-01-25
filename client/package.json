@@ -20,7 +20,8 @@
   "scripts": {
     "intro": "gulp clean && gulp intro",
     "dev": "gulp clean && gulp dev",
-    "build": "gulp clean && gulp build"
+    "build": "gulp clean && gulp build",
+    "shapes": "gulp clean && gulp shapes"
   },
   "author": "",
   "license": "ISC"

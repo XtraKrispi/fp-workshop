@@ -1,4 +1,4 @@
-module Intro exposing (..)
+module Intro exposing (main)
 
 import Html exposing (Html, button, span, div, text)
 
