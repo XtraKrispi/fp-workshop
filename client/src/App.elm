@@ -50,7 +50,7 @@ update _ model =
 
 view : Model -> Html msg
 view _ =
-    div []
+    div [ id "todo-app" ]
         [ section [ class "todoapp" ]
             [ header [ class "header" ]
                 [ h1 []

@@ -1,7 +1,16 @@
 module Shapes exposing (main)
 
-import Html exposing (Html, beginnerProgram, div, input, label, text, span)
-import Html.Attributes exposing (type_, name, checked, value)
+import Html
+    exposing
+        ( Html
+        , beginnerProgram
+        , div
+        , input
+        , label
+        , text
+        , span
+        )
+import Html.Attributes exposing (type_, name, checked, value, id)
 
 
 type Msg
@@ -29,7 +38,7 @@ update _ model =
 
 view : Model -> Html Msg
 view _ =
-    div []
+    div [ id "shapes-app" ]
         [ div []
             [ label [] [ input [ type_ "radio", name "shapes", checked True ] [], text "Square" ]
             , label [] [ input [ type_ "radio", name "shapes" ] [], text "Rectangle" ]

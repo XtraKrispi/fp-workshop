@@ -19,11 +19,19 @@ var paths = {
     staticAssets: 'src/static/index.html',
     staticAssetsIntro: 'src/static/intro.html',
     staticAssetsShapes: 'src/static/shapes.html',
-    css: 'node_modules/todomvc-app-css/index.css'
+    css: 'node_modules/todomvc-app-css/index.css',
+    sass: 'src/sass/*.scss'
 };
 
 gulp.task('clean', function(cb){
     del([paths.dest], cb);
+});
+
+gulp.task('sass', function(){
+    return gulp.src(paths.sass)
+        .pipe(sass().on('error', sass.logError))
+        .pipe(gulp.dest(paths.dest + "/css"))
+        .pipe(browserSync.stream());
 });
 
 gulp.task('elm-init', elm.init);
@@ -101,23 +109,26 @@ gulp.task('watch', ['browser-sync'], function(){
     gulp.watch(["json-data.json"], ["jsonServer"]).on('change', browserSync.reload);
     gulp.watch(paths.elm, ['elm-watch']);
     gulp.watch(paths.staticAssets, ['staticAssets']).on('change', browserSync.reload);
+    gulp.watch(paths.sass, ['sass']);
 });
 
 gulp.task('watch-intro', ['browser-sync'], function(){
     gulp.watch(["json-data.json"], ["jsonServer"]).on('change', browserSync.reload);
     gulp.watch(paths.elm, ['elm-watch-intro']);
     gulp.watch(paths.staticAssets, ['staticAssets-intro']).on('change', browserSync.reload);
+    gulp.watch(paths.sass, ['sass']);
 });
 
 gulp.task('watch-shapes', ['browser-sync'], function(){
     gulp.watch(["json-data.json"], ["jsonServer"]).on('change', browserSync.reload);
     gulp.watch(paths.elm, ['elm-watch-shapes']);
     gulp.watch(paths.staticAssets, ['staticAssets-shapes']).on('change', browserSync.reload);
+    gulp.watch(paths.sass, ['sass']);
 });
 
-gulp.task('build', ['elm', 'staticAssets', 'css']);
-gulp.task('build-intro', ['elm-intro', 'staticAssets-intro']);
-gulp.task('build-shapes', ['elm-shapes', 'staticAssets-shapes']);
+gulp.task('build', ['elm', 'staticAssets', 'css', 'sass']);
+gulp.task('build-intro', ['elm-intro', 'staticAssets-intro', 'sass']);
+gulp.task('build-shapes', ['elm-shapes', 'staticAssets-shapes', 'sass']);
 gulp.task('intro', ['jsonServer', 'build-intro', 'watch-intro']);
 gulp.task('shapes', ['jsonServer', 'build-shapes', 'watch-shapes']);
 gulp.task('dev', ['jsonServer', 'build', 'watch']);
