@@ -45,7 +45,14 @@
 }
 
 #shapes-app {
+  margin: 0 auto;
   font-family: 'Verdana', 'Arial';
+  width: 500px;
+  margin-top: 20px;
+  background-color: #00ace5;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 3px 3px rgba(200, 200, 200, 0.5);
 
   /* The container */
   .container {
@@ -87,7 +94,7 @@
 
   /* When the radio button is checked, add a blue background */
   .container input:checked ~ .checkmark {
-    background-color: #2196F3;
+    background-color: #aaa;
   }
 
   /* Create the indicator (the dot/circle - hidden when not checked) */
