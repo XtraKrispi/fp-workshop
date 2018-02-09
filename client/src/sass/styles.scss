@@ -5,8 +5,9 @@
   margin-top: 100px;
   
   button {
-    background-color: #00aae5; /* Green */
-    border: none;
+    position: relative;
+    background-color: #00aae5;
+    border: 1px solid rgba(100, 100, 100, 0.3);
     color: white;
     padding: 15px 30px;
     text-align: center;
@@ -14,6 +15,32 @@
     display: inline-block;
     font-size: 16px;
     margin: 10px;
+    border-radius: 5px;
+    box-shadow: 2px 2px rgba(100, 100, 100, 0.3);
+    outline: none;
+    cursor: pointer;
+    transition-duration: 0.2s; 
+    overflow: hidden;
+
+      &:after {
+        content: "";
+        background: rgba(255, 255, 255, 0.5);
+        display: block;
+        position: absolute;
+        padding-top: 300%;
+        padding-left: 350%;
+        margin-left: -40px!important;
+        margin-top: -120%;
+        opacity: 0;
+        transition: all 0.8s
+      }
+
+      &:active:after {
+        padding: 0;
+        margin: 0;
+        opacity: 1;
+        transition: 0s
+      }
   }
 }
 
