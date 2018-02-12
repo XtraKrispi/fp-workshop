@@ -29,8 +29,6 @@ Nice to haves
    Install from here: https://code.visualstudio.com/
 3) **elm VSCode extension**
    Can be installed from the extensions pane
-   
-   My suggestion is to change the setting `elm.formatOnSave` to `true` in Preferences
 
 Getting Started
 ===============
