@@ -10,6 +10,7 @@ Prerequisites
 
    Yarn can be found here: https://yarnpkg.com/en/
 2) **Elm**
+
    Install elm via:
 
      npm: `npm install -g elm`
