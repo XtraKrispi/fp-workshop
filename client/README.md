@@ -37,9 +37,9 @@ Once you have Elm and npm/yarn installed, simply run
 
 `npm install` or `yarn` in the client directory to install any dependencies
 
-After they are installed, run the dev application:
+After they are installed, run the intro application:
 
-`npm run dev` or `yarn dev`
+`npm run intro` or `yarn intro`
 
 This will start up a web server at port 3000 that is watching the source tree 
 for changes and will automatically reload your browser on file changes.
