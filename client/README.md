@@ -37,7 +37,10 @@ Getting Started
 
 Once you have Elm and npm/yarn installed, simply run
 
-`npm install` or `yarn` in the client directory to install any dependencies
+`npm install` or `yarn` in the `client` directory to install any dependencies
+
+There may be an issue with Permissions when running this command.  If you have problems, we've fixed this by running
+`npm cache clean --force` and rerunning `npm install`
 
 After they are installed, run the intro application:
 
