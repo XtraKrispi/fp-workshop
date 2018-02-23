@@ -30,6 +30,17 @@ Nice to haves
 3) **elm VSCode extension**
    Can be installed from the extensions pane
 
+   OR
+
+2) **Atom**
+   Install from here: https://atom.io/
+3) **Packages for Atom**
+   Follow the instructions here: https://medium.com/@kana_sama/elm-atom-9c6c2383fd04
+
+My preferred setup at this point is with Atom as it seems to provide a superior
+ide-like environment with Go To Definition support, auto formatting, linting on the 
+fly (no saving required), full autocomplete and more.
+
 Getting Started
 ===============
 
@@ -44,5 +55,5 @@ After they are installed, run the intro application:
 
 `npm run intro` or `yarn intro`
 
-This will start up a web server at port 3000 that is watching the source tree 
+This will start up a web server at port 3000 that is watching the source tree
 for changes and will automatically reload your browser on file changes.
