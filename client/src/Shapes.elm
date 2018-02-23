@@ -5,8 +5,8 @@ import Html
         ( Html
         , beginnerProgram
         , div
-        , input
         , label
+        , input
         , text
         , span
         )
@@ -17,27 +17,30 @@ import Html.Events exposing (onCheck, onInput)
 type Msg
     = SquareChecked
     | RectangleChecked
-    | Side1Changed Int
-    | Side2Changed Int
+    | SquareSideChanged String
+    | RectangleLengthChanged String
+    | RectangleWidthChanged String
 
 
 type Shape
-    = Square
-    | Rectangle
+    = Square Side
+    | Rectangle Length Width
 
 
-type alias Side1 =
-    Int
+type Side
+    = Side Int
 
 
-type alias Side2 =
-    Int
+type Length
+    = Length Int
+
+
+type Width
+    = Width Int
 
 
 type alias Model =
     { shape : Shape
-    , side1 : Side1
-    , side2 : Maybe Side2
     }
 
 
@@ -48,135 +51,119 @@ main =
 
 model : Model
 model =
-    { shape = Rectangle
-    , side1 = 0
-    , side2 = Just 0
+    { shape = Rectangle (Length 0) (Width 0)
     }
 
 
 update : Msg -> Model -> Model
 update msg model =
-    case msg of
-        SquareChecked ->
-            { shape = Square, side1 = 0, side2 = Nothing }
+    let
+        def =
+            Result.withDefault 0 << String.toInt
+    in
+        case msg of
+            SquareChecked ->
+                { shape = Square (Side 0) }
 
-        RectangleChecked ->
-            { shape = Rectangle, side1 = 0, side2 = Just 0 }
+            RectangleChecked ->
+                { shape = Rectangle (Length 0) (Width 0) }
 
-        Side1Changed a ->
-            { model | side1 = a }
+            SquareSideChanged str ->
+                case model.shape of
+                    Square _ ->
+                        { model | shape = Square (Side (def str)) }
 
-        Side2Changed a ->
-            { model | side2 = Just a }
+                    _ ->
+                        model
+
+            RectangleLengthChanged str ->
+                case model.shape of
+                    Rectangle _ w ->
+                        { model | shape = Rectangle (Length (def str)) w }
+
+                    _ ->
+                        model
+
+            RectangleWidthChanged str ->
+                case model.shape of
+                    Rectangle l _ ->
+                        { model | shape = Rectangle l (Width (def str)) }
+
+                    _ ->
+                        model
 
 
-area : Shape -> Side1 -> Maybe Side2 -> Int
-area shape s1 s2 =
+area : Shape -> Int
+area shape =
     case shape of
-        Square ->
-            s1 * s1
+        Square (Side s) ->
+            s * s
 
-        Rectangle ->
-            s1 * (Maybe.withDefault 0 s2)
+        Rectangle (Length l) (Width w) ->
+            l * w
 
 
 view : Model -> Html Msg
 view model =
     let
-        side2Normal =
-            model.side2
-                |> Maybe.withDefault 0
-                |> toString
+        numberInput l val msg =
+            div []
+                [ label [] [ text l ]
+                , input [ type_ "number", value val, onInput msg ] []
+                ]
 
         shapeView =
             case model.shape of
-                Square ->
+                Square (Side side) ->
                     div []
-                        [ label [] [ text "Side Length: " ]
-                        , input
-                            [ type_ "number"
-                            , value (toString model.side1)
-                            , onInput
-                                (\s ->
-                                    s
-                                        |> String.toInt
-                                        |> Result.withDefault 0
-                                        |> Side1Changed
-                                )
-                            ]
-                            []
+                        [ numberInput "Side Length: " (toString side) SquareSideChanged
                         ]
 
-                Rectangle ->
+                Rectangle (Length l) (Width w) ->
                     div []
-                        [ label [] [ text "Length: " ]
-                        , input
-                            [ type_ "number"
-                            , value (toString model.side1)
-                            , onInput
-                                (\s ->
-                                    s
-                                        |> String.toInt
-                                        |> Result.withDefault 0
-                                        |> Side1Changed
-                                )
-                            ]
-                            []
-                        , label [] [ text "Width: " ]
-                        , input
-                            [ type_ "number"
-                            , value side2Normal
-                            , onInput
-                                (\s ->
-                                    s
-                                        |> String.toInt
-                                        |> Result.withDefault 0
-                                        |> Side2Changed
-                                )
-                            ]
-                            []
+                        [ numberInput "Length: " (toString l) RectangleLengthChanged
+                        , numberInput "Width: " (toString w) RectangleWidthChanged
                         ]
 
-        isChecked shape1 shape2 =
-            case ( shape1, shape2 ) of
-                ( Square, Square ) ->
+        isChecked shape1 =
+            case ( shape1, model.shape ) of
+                ( Square _, Square _ ) ->
                     True
 
-                ( Rectangle, Rectangle ) ->
+                ( Rectangle _ _, Rectangle _ _ ) ->
                     True
 
-                _ ->
+                ( Square _, _ ) ->
                     False
+
+                ( Rectangle _ _, _ ) ->
+                    False
+
+        radio n l ic msg =
+            label [ class "container" ]
+                [ text l
+                , input
+                    [ type_ "radio"
+                    , name n
+                    , checked ic
+                    , onCheck msg
+                    ]
+                    []
+                , span [ class "checkmark" ] []
+                ]
+
+        shapesRadio =
+            radio "shapes"
     in
         div [ id "shapes-app" ]
             [ div []
-                [ label [ class "container" ]
-                    [ text "Square"
-                    , input
-                        [ type_ "radio"
-                        , name "shapes"
-                        , checked (isChecked Square model.shape)
-                        , onCheck (\_ -> SquareChecked)
-                        ]
-                        []
-                    , span [ class "checkmark" ] []
-                    ]
-                , label [ class "container" ]
-                    [ text "Rectangle"
-                    , input
-                        [ type_ "radio"
-                        , name "shapes"
-                        , checked (isChecked Rectangle model.shape)
-                        , onCheck (\_ -> RectangleChecked)
-                        ]
-                        []
-                    , span [ class "checkmark" ] []
-                    ]
+                [ shapesRadio "Square" (isChecked (Square (Side 0))) (always SquareChecked)
+                , shapesRadio "Rectangle" (isChecked (Rectangle (Length 0) (Width 0))) (always RectangleChecked)
                 ]
             , shapeView
             , div []
                 [ span []
-                    [ text ("Area: " ++ (toString <| area model.shape model.side1 model.side2))
+                    [ text ("Area: " ++ (toString <| area model.shape))
                     ]
                 ]
             ]
