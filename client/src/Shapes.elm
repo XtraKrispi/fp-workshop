@@ -23,12 +23,16 @@ type Msg
 
 
 type Shape
-    = Square Side
-    | Rectangle Length Width
+    = Square (FormField Side)
+    | Rectangle (FormField Length) (FormField Width)
 
 
 type Side
     = Side Int
+
+
+type alias FormField a =
+    ( a, String )
 
 
 type Length
@@ -40,8 +44,7 @@ type Width
 
 
 type alias Model =
-    { shape : Shape
-    }
+    Shape
 
 
 main : Program Never Model Msg
@@ -51,8 +54,7 @@ main =
 
 model : Model
 model =
-    { shape = Rectangle (Length 0) (Width 0)
-    }
+    Rectangle ( (Length 0), "" ) ( (Width 0), "" )
 
 
 update : Msg -> Model -> Model
@@ -63,31 +65,46 @@ update msg model =
     in
         case msg of
             SquareChecked ->
-                { shape = Square (Side 0) }
+                Square ( (Side 0), "" )
 
             RectangleChecked ->
-                { shape = Rectangle (Length 0) (Width 0) }
+                Rectangle ( (Length 0), "" ) ( (Width 0), "" )
 
             SquareSideChanged str ->
-                case model.shape of
-                    Square _ ->
-                        { model | shape = Square (Side (def str)) }
+                case model of
+                    Square ( s, _ ) ->
+                        case String.toInt str of
+                            Ok newSide ->
+                                Square ( Side newSide, str )
+
+                            Err _ ->
+                                Square ( s, str )
 
                     _ ->
                         model
 
             RectangleLengthChanged str ->
-                case model.shape of
-                    Rectangle _ w ->
-                        { model | shape = Rectangle (Length (def str)) w }
+                case model of
+                    Rectangle ( l, _ ) w ->
+                        case String.toInt str of
+                            Ok newLength ->
+                                Rectangle ( Length newLength, str ) w
+
+                            Err _ ->
+                                Rectangle ( l, str ) (w)
 
                     _ ->
                         model
 
             RectangleWidthChanged str ->
-                case model.shape of
-                    Rectangle l _ ->
-                        { model | shape = Rectangle l (Width (def str)) }
+                case model of
+                    Rectangle l ( w, _ ) ->
+                        case String.toInt str of
+                            Ok newWidth ->
+                                Rectangle l ( Width newWidth, str )
+
+                            Err _ ->
+                                Rectangle l ( w, str )
 
                     _ ->
                         model
@@ -96,10 +113,10 @@ update msg model =
 area : Shape -> Int
 area shape =
     case shape of
-        Square (Side s) ->
+        Square ( Side s, _ ) ->
             s * s
 
-        Rectangle (Length l) (Width w) ->
+        Rectangle ( Length l, _ ) ( Width w, _ ) ->
             l * w
 
 
@@ -113,20 +130,20 @@ view model =
                 ]
 
         shapeView =
-            case model.shape of
-                Square (Side side) ->
+            case model of
+                Square ( Side side, str ) ->
                     div []
-                        [ numberInput "Side Length: " (toString side) SquareSideChanged
+                        [ numberInput "Side Length: " str SquareSideChanged
                         ]
 
-                Rectangle (Length l) (Width w) ->
+                Rectangle ( Length l, lStr ) ( Width w, wStr ) ->
                     div []
-                        [ numberInput "Length: " (toString l) RectangleLengthChanged
-                        , numberInput "Width: " (toString w) RectangleWidthChanged
+                        [ numberInput "Length: " lStr RectangleLengthChanged
+                        , numberInput "Width: " wStr RectangleWidthChanged
                         ]
 
         isChecked shape1 =
-            case ( shape1, model.shape ) of
+            case ( shape1, model ) of
                 ( Square _, Square _ ) ->
                     True
 
@@ -157,13 +174,13 @@ view model =
     in
         div [ id "shapes-app" ]
             [ div []
-                [ shapesRadio "Square" (isChecked (Square (Side 0))) (always SquareChecked)
-                , shapesRadio "Rectangle" (isChecked (Rectangle (Length 0) (Width 0))) (always RectangleChecked)
+                [ shapesRadio "Square" (isChecked (Square ( (Side 0), "" ))) (always SquareChecked)
+                , shapesRadio "Rectangle" (isChecked (Rectangle ( (Length 0), "" ) ( (Width 0), "" ))) (always RectangleChecked)
                 ]
             , shapeView
             , div []
                 [ span []
-                    [ text ("Area: " ++ (toString <| area model.shape))
+                    [ text ("Area: " ++ (toString <| area model))
                     ]
                 ]
             ]
