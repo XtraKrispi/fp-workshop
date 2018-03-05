@@ -38,17 +38,21 @@ type alias Model =
     {}
 
 
-main : Program Never Model msg
+type Msg
+    = NoOp
+
+
+main : Program Never Model Msg
 main =
     beginnerProgram { model = {}, update = update, view = view }
 
 
-update : msg -> Model -> Model
+update : Msg -> Model -> Model
 update _ model =
     model
 
 
-view : Model -> Html msg
+view : Model -> Html Msg
 view _ =
     div [ id "todo-app" ]
         [ section [ class "todoapp" ]
