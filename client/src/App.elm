@@ -3,7 +3,7 @@ module App exposing (main)
 import Html
     exposing
         ( Html
-        , beginnerProgram
+        , program
         , div
         , text
         , section
@@ -31,92 +31,182 @@ import Html.Attributes
         , checked
         , value
         , href
+        , classList
         )
+import Html.Events exposing (onClick, onCheck)
+
+
+type Status
+    = Incomplete
+    | Complete
+
+
+type alias Todo =
+    { description : String
+    , status : Status
+    }
 
 
 type alias Model =
-    {}
+    { todos : List Todo
+    , currentFilter : Maybe Status
+    }
 
 
 type Msg
-    = NoOp
+    = ChangeFilter (Maybe Status)
+    | ClearCompleted
+    | UpdateStatus Todo Status
 
 
 main : Program Never Model Msg
 main =
-    beginnerProgram { model = {}, update = update, view = view }
+    program { init = init, update = update, view = view, subscriptions = subscriptions }
 
 
-update : Msg -> Model -> Model
-update _ model =
-    model
+init : ( Model, Cmd Msg )
+init =
+    ( { todos =
+            [ { description = "Task 1", status = Complete }
+            , { description = "Buy a unicorn", status = Incomplete }
+            , { description = "Learn Elm", status = Complete }
+            , { description = "Profit", status = Incomplete }
+            ]
+      , currentFilter = Nothing
+      }
+    , Cmd.none
+    )
+
+
+subscriptions : Model -> Sub Msg
+subscriptions _ =
+    Sub.none
+
+
+filterIncomplete : List { r | status : Status } -> List { r | status : Status }
+filterIncomplete =
+    List.filter (\todo -> todo.status == Incomplete)
+
+
+update : Msg -> Model -> ( Model, Cmd Msg )
+update msg model =
+    case msg of
+        ChangeFilter newFilter ->
+            ( { model | currentFilter = newFilter }, Cmd.none )
+
+        ClearCompleted ->
+            ( { model | todos = filterIncomplete model.todos }, Cmd.none )
+
+        UpdateStatus todo status ->
+            let
+                mapFn t =
+                    if (t == todo) then
+                        { t | status = status }
+                    else
+                        t
+            in
+                ( { model | todos = List.map mapFn model.todos }, Cmd.none )
 
 
 view : Model -> Html Msg
-view _ =
-    div [ id "todo-app" ]
-        [ section [ class "todoapp" ]
-            [ header [ class "header" ]
-                [ h1 []
-                    [ text "todos" ]
-                , input
-                    [ class "new-todo", placeholder "What needs to be done?", autofocus True ]
+view model =
+    let
+        filterFn todo =
+            case ( model.currentFilter, todo.status ) of
+                ( Nothing, _ ) ->
+                    True
+
+                ( Just status, todoStatus ) ->
+                    status == todoStatus
+
+        filteredTodos =
+            List.filter filterFn model.todos
+
+        incompleteTodos =
+            filterIncomplete filteredTodos
+    in
+        div [ id "todo-app" ]
+            [ section [ class "todoapp" ]
+                [ header [ class "header" ]
+                    [ h1 []
+                        [ text "todos" ]
+                    , input
+                        [ class "new-todo", placeholder "What needs to be done?", autofocus True ]
+                        []
+                    ]
+                , section [ class "main" ]
+                    [ input [ id "toggle-all", class "toggle-all", type_ "checkbox" ] []
+                    , label [ for "toggle-all" ] [ text "Mark all as complete" ]
+                    , ul [ class "todo-list" ] <| List.map todoListItem filteredTodos
+                    ]
+                , footer [ class "footer" ]
+                    [ span [ class "todo-count" ]
+                        [ strong [] [ text (toString <| List.length incompleteTodos) ]
+                        , text " items left"
+                        ]
+                    , ul [ class "filters" ]
+                        [ li []
+                            [ a
+                                [ classList [ ( "selected", model.currentFilter == Nothing ) ]
+                                , onClick (ChangeFilter Nothing)
+                                ]
+                                [ text "All" ]
+                            ]
+                        , li []
+                            [ a
+                                [ classList [ ( "selected", model.currentFilter == Just Incomplete ) ]
+                                , onClick (ChangeFilter (Just Incomplete))
+                                ]
+                                [ text "Active" ]
+                            ]
+                        , li []
+                            [ a
+                                [ classList [ ( "selected", model.currentFilter == Just Complete ) ]
+                                , onClick (ChangeFilter (Just Complete))
+                                ]
+                                [ text "Completed" ]
+                            ]
+                        ]
+                    , button [ class "clear-completed", onClick ClearCompleted ] [ text "Clear completed" ]
+                    ]
+                ]
+            , footer [ class "info" ]
+                [ p [] [ text "Double-click to edit a todo" ]
+                , p [] [ text "Template by ", a [ href "http://sindresorhus.com" ] [ text "Sindre Sorhus" ] ]
+                , p [] [ text "Created by ", a [ href "http://todomvc.com" ] [ text "Michael Gold" ] ]
+                ]
+            ]
+
+
+todoListItem : Todo -> Html Msg
+todoListItem todo =
+    let
+        isComplete =
+            todo.status == Complete
+    in
+        li [ classList [ ( "completed", isComplete ) ] ]
+            [ div [ class "view" ]
+                [ input
+                    [ class "toggle"
+                    , type_ "checkbox"
+                    , checked isComplete
+                    , onCheck
+                        (always <|
+                            UpdateStatus todo
+                                (if isComplete then
+                                    Incomplete
+                                 else
+                                    Complete
+                                )
+                        )
+                    ]
+                    []
+                , label
+                    []
+                    [ text todo.description ]
+                , button
+                    [ class "destroy" ]
                     []
                 ]
-            , section [ class "main" ]
-                [ input [ id "toggle-all", class "toggle-all", type_ "checkbox" ] []
-                , label [ for "toggle-all" ] [ text "Mark all as complete" ]
-                , ul [ class "todo-list" ]
-                    [ li [ class "completed" ]
-                        [ div [ class "view" ]
-                            [ input [ class "toggle", type_ "checkbox", checked True ]
-                                []
-                            , label
-                                []
-                                [ text "Taste Elm" ]
-                            , button
-                                [ class "destroy" ]
-                                []
-                            ]
-                        , input [ class "edit", value "Create a TodoMVC template" ] []
-                        ]
-                    , li []
-                        [ div [ class "view" ]
-                            [ input [ class "toggle", type_ "checkbox" ]
-                                []
-                            , label
-                                []
-                                [ text "Buy a unicorn" ]
-                            , button
-                                [ class "destroy" ]
-                                []
-                            ]
-                        , input [ class "edit", value "Rule the web" ] []
-                        ]
-                    ]
-                ]
-            , footer [ class "footer" ]
-                [ span [ class "todo-count" ]
-                    [ strong [] [ text "0" ]
-                    , text " items left"
-                    ]
-                , ul [ class "filters" ]
-                    [ li []
-                        [ a [ class "selected" ] [ text "All" ]
-                        ]
-                    , li []
-                        [ a [] [ text "Active" ]
-                        ]
-                    , li []
-                        [ a [] [ text "Completed" ]
-                        ]
-                    ]
-                , button [ class "clear-completed" ] [ text "Clear completed" ]
-                ]
+            , input [ class "edit", value todo.description ] []
             ]
-        , footer [ class "info" ]
-            [ p [] [ text "Double-click to edit a todo" ]
-            , p [] [ text "Template by ", a [ href "http://sindresorhus.com" ] [ text "Sindre Sorhus" ] ]
-            , p [] [ text "Created by ", a [ href "http://todomvc.com" ] [ text "Michael Gold" ] ]
-            ]
-        ]
