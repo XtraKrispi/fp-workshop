@@ -33,19 +33,11 @@ import Html.Attributes
         , href
         , classList
         )
-import Html.Events exposing (onClick, onCheck)
-
-
-type Status
-    = Incomplete
-    | Complete
-
-
-type alias Todo =
-    { description : String
-    , status : Status
-    }
-
+import Html.Events exposing (onClick, onCheck, on, keyCode)
+import Random.Pcg exposing (generate)
+import Uuid exposing (uuidGenerator, Uuid)
+import Todos.Types exposing (..)
+import Json.Decode as Json
 
 type alias Model =
     { todos : List Todo
@@ -210,3 +202,7 @@ todoListItem todo =
                 ]
             , input [ class "edit", value todo.description ] []
             ]
+
+onKeyUp : (Int -> Msg) -> Html.Attribute Msg
+onKeyUp tagger =
+  on "keyup" (Json.map tagger keyCode)
