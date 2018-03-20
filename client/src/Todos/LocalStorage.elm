@@ -1,3 +1,15 @@
-module Todos.LocalStorage exposing (..)
+port module Todos.LocalStorage exposing (..)
 
-blah = 0
+import Json.Encode exposing (Value)
+
+
+port setItem : ( String, Value ) -> Cmd msg
+
+
+port requestItem : String -> Cmd msg
+
+
+port itemFetched : (Value -> msg) -> Sub msg
+
+
+port itemNotFound : (String -> msg) -> Sub msg

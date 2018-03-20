@@ -33,15 +33,18 @@ import Html.Attributes
         , href
         , classList
         )
-import Html.Events exposing (onClick, onCheck, on, keyCode)
+import Html.Events exposing (onClick, onCheck, on, keyCode, onInput)
 import Random.Pcg exposing (generate)
 import Uuid exposing (uuidGenerator, Uuid)
 import Todos.Types exposing (..)
 import Json.Decode as Json
+import Todos.LocalStorage exposing (..)
+import Json.Encode as Encode exposing (Value)
 
 type alias Model =
     { todos : List Todo
     , currentFilter : Maybe Status
+    , newItemDescription : String
     }
 
 
@@ -49,7 +52,19 @@ type Msg
     = ChangeFilter (Maybe Status)
     | ClearCompleted
     | UpdateStatus Todo Status
+    | NewItemDescriptionChanged String
+    | NewItemOnKeyUp Int
+    | ItemIdGenerated Uuid
+    | TodosFetched Value
 
+escapeKeyCode : Int
+escapeKeyCode = 27
+
+enterKeyCode : Int
+enterKeyCode = 13
+
+todoLocalStorageKey : String
+todoLocalStorageKey = "todos"
 
 main : Program Never Model Msg
 main =
@@ -58,21 +73,17 @@ main =
 
 init : ( Model, Cmd Msg )
 init =
-    ( { todos =
-            [ { description = "Task 1", status = Complete }
-            , { description = "Buy a unicorn", status = Incomplete }
-            , { description = "Learn Elm", status = Complete }
-            , { description = "Profit", status = Incomplete }
-            ]
+    ( { todos = []
       , currentFilter = Nothing
+      , newItemDescription = ""
       }
-    , Cmd.none
+    , requestItem todoLocalStorageKey
     )
 
 
 subscriptions : Model -> Sub Msg
 subscriptions _ =
-    Sub.none
+    itemFetched TodosFetched
 
 
 filterIncomplete : List { r | status : Status } -> List { r | status : Status }
@@ -98,7 +109,23 @@ update msg model =
                         t
             in
                 ( { model | todos = List.map mapFn model.todos }, Cmd.none )
-
+        NewItemDescriptionChanged description ->
+            ( { model | newItemDescription = description }, Cmd.none )
+        NewItemOnKeyUp key ->
+            case key of
+                13 -> 
+                    (model, generate ItemIdGenerated uuidGenerator)
+                _ -> (model, Cmd.none)
+        ItemIdGenerated uuid ->
+            let todo = Todo uuid model.newItemDescription Incomplete
+                todos = model.todos ++ [todo]
+            in ( { model | todos = todos, newItemDescription = "" }, saveInLocalStorage todos)
+        TodosFetched value ->
+            case Json.decodeValue (Json.list todoDecoder) value of
+                Ok todos ->
+                    ( {model | todos = todos }, Cmd.none)
+                Err err  ->
+                    (model, Cmd.none)
 
 view : Model -> Html Msg
 view model =
@@ -123,7 +150,13 @@ view model =
                     [ h1 []
                         [ text "todos" ]
                     , input
-                        [ class "new-todo", placeholder "What needs to be done?", autofocus True ]
+                        [ class "new-todo"
+                        , placeholder "What needs to be done?"
+                        , autofocus True
+                        , value model.newItemDescription
+                        , onInput NewItemDescriptionChanged
+                        , onKeyUp NewItemOnKeyUp
+                        ]
                         []
                     ]
                 , section [ class "main" ]
@@ -203,6 +236,14 @@ todoListItem todo =
             , input [ class "edit", value todo.description ] []
             ]
 
+
 onKeyUp : (Int -> Msg) -> Html.Attribute Msg
 onKeyUp tagger =
-  on "keyup" (Json.map tagger keyCode)
+    on "keyup" (Json.map tagger keyCode)
+
+saveInLocalStorage : List Todo -> Cmd Msg
+saveInLocalStorage todos =
+    let values = todos
+                    |> List.map encodeTodo
+                    |> Encode.list
+    in setItem (todoLocalStorageKey, values)

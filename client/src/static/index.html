@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,10 +9,28 @@
     <link rel="stylesheet" href="css/index.css">
     <link rel="stylesheet" href="css/styles.css">
 </head>
+
 <body>
     <script src="App.js"></script>
     <script>
         var app = Elm.App.fullscreen();
+
+        app.ports.setItem.subscribe(function (args) {
+            var [key, value] = args;
+
+            window.localStorage.setItem(key, JSON.stringify(value));
+        });
+
+        app.ports.requestItem.subscribe(function (key) {
+            var item = window.localStorage.getItem(key);
+
+            if (item) {
+                app.ports.itemFetched.send(JSON.parse(item));
+            } else {
+                app.ports.itemNotFound.send("Item with key " + key + " not found.");
+            }
+        });
     </script>
 </body>
+
 </html>
