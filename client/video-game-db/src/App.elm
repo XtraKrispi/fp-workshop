@@ -11,6 +11,7 @@ import Page.Home as Home
 import Page.Developers as Developers
 import Page.Publishers as Publishers
 import Page.Games as Games
+import Ports
 
 
 type alias Model =
@@ -55,10 +56,10 @@ init location =
         ( navbarState, navbarCmd ) =
             Navbar.initialState NavbarMsg
 
-        ( page, pageCmd ) =
+        ( page, pageCmd, pageTitle ) =
             setRoute (Routes.fromLocation location)
     in
-        { navbarState = navbarState, currentPage = page } ! [ navbarCmd, pageCmd ]
+        { navbarState = navbarState, currentPage = page } ! [ navbarCmd, pageCmd, Ports.setPageTitle pageTitle ]
 
 
 subscriptions : Model -> Sub Msg
@@ -74,10 +75,10 @@ update msg model =
 
         ChangeRoute mRoute ->
             let
-                ( page, cmd ) =
+                ( page, cmd, title ) =
                     setRoute mRoute
             in
-                { model | currentPage = page } ! [ cmd ]
+                { model | currentPage = page } ! [ cmd, Ports.setPageTitle title ]
 
         HomePageMsg msg ->
             case model.currentPage of
@@ -90,6 +91,7 @@ update msg model =
 
                 _ ->
                     model ! []
+
         DevelopersPageMsg msg ->
             case model.currentPage of
                 Developers m ->
@@ -101,6 +103,7 @@ update msg model =
 
                 _ ->
                     model ! []
+
         PublishersPageMsg msg ->
             case model.currentPage of
                 Publishers m ->
@@ -112,6 +115,7 @@ update msg model =
 
                 _ ->
                     model ! []
+
         GamesPageMsg msg ->
             case model.currentPage of
                 Games m ->
@@ -124,42 +128,50 @@ update msg model =
                 _ ->
                     model ! []
 
-setRoute : Maybe Route -> ( Page, Cmd Msg )
+
+setRoute : Maybe Route -> ( Page, Cmd Msg, String )
 setRoute mRoute =
-    case mRoute of
-        Nothing ->
-            NotFound ! []
+    let
+        getTitle title =
+            "VgDB | " ++ title
+    in
+        case mRoute of
+            Nothing ->
+                ( NotFound, Cmd.none, getTitle "Page Not Found!" )
 
-        Just Routes.Home ->
-            let
-                ( model, cmd ) =
-                    Home.init
-            in
-                Home model ! [ Cmd.map HomePageMsg cmd ]
+            Just (Routes.Home) ->
+                let
+                    ( model, cmd ) =
+                        Home.init
+                in
+                    ( Home model, Cmd.map HomePageMsg cmd, getTitle "Home" )
 
-        Just Routes.Developers -> 
-            let
-                ( model, cmd ) =
-                    Developers.init
-            in
-                Developers model ! [ Cmd.map DevelopersPageMsg cmd ]
-        Just Routes.Publishers -> 
-            let
-                ( model, cmd ) =
-                    Publishers.init
-            in
-                Publishers model ! [ Cmd.map PublishersPageMsg cmd ]
-        Just Routes.Games -> 
-            let
-                ( model, cmd ) =
-                    Games.init
-            in
-                Games model ! [ Cmd.map GamesPageMsg cmd ]
+            Just (Routes.Developers) ->
+                let
+                    ( model, cmd ) =
+                        Developers.init
+                in
+                    ( Developers model, Cmd.map DevelopersPageMsg cmd, getTitle "Developers" )
+
+            Just (Routes.Publishers) ->
+                let
+                    ( model, cmd ) =
+                        Publishers.init
+                in
+                    ( Publishers model, Cmd.map PublishersPageMsg cmd, getTitle "Publishers" )
+
+            Just (Routes.Games) ->
+                let
+                    ( model, cmd ) =
+                        Games.init
+                in
+                    ( Games model, Cmd.map GamesPageMsg cmd, getTitle "Games" )
+
 
 view : Model -> Html Msg
 view model =
     let
-        laidOut = 
+        laidOut =
             case model.currentPage of
                 Home m ->
                     let
@@ -174,18 +186,21 @@ view model =
                             Developers.view m
                     in
                         layout (Just DevelopersNav) <| Html.map DevelopersPageMsg v
+
                 Publishers m ->
                     let
                         v =
                             Publishers.view m
                     in
                         layout (Just PublishersNav) <| Html.map PublishersPageMsg v
+
                 Games m ->
                     let
                         v =
                             Games.view m
                     in
                         layout (Just GamesNav) <| Html.map GamesPageMsg v
+
                 NotFound ->
                     layout Nothing (div [] [ text "Not Found" ])
 
@@ -243,6 +258,6 @@ nav n activePage =
             |> Navbar.darkCustom (Color.rgba 100 100 100 0.5)
             |> Navbar.fixTop
             |> Navbar.collapseLarge
-            |> Navbar.brand [class "brand", href "#" ] [ text "VgDB" ]
+            |> Navbar.brand [ class "brand", href "#" ] [ text "VgDB" ]
             |> Navbar.items (menuLinks)
             |> Navbar.view n
