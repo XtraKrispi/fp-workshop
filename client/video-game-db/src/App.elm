@@ -1,8 +1,7 @@
 module App exposing (main)
 
 import Html exposing (Html, text, div)
-import Html.Attributes exposing (href)
-import Html.Events exposing (onClick)
+import Html.Attributes exposing (href, class)
 import Bootstrap.Grid as Grid
 import Bootstrap.Navbar as Navbar
 import Color
@@ -244,6 +243,6 @@ nav n activePage =
             |> Navbar.darkCustom (Color.rgba 100 100 100 0.5)
             |> Navbar.fixTop
             |> Navbar.collapseLarge
-            |> Navbar.brand [ href "#" ] [ text "VgDB" ]
+            |> Navbar.brand [class "brand", href "#" ] [ text "VgDB" ]
             |> Navbar.items (menuLinks)
             |> Navbar.view n
