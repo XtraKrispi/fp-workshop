@@ -1,6 +1,8 @@
 module Page.Home exposing (Model, Msg, init, update, view)
 
 import Html exposing (Html, div, text)
+import Bootstrap.Grid as Grid
+import Bootstrap.Utilities.Spacing as Spacing
 
 type alias Model = {}
 
@@ -16,4 +18,4 @@ update msg model =
       model ! []
 
 view : Model -> Html Msg
-view model = div [] [text "Home Page"]
+view model = Grid.container [Spacing.mAuto] [text "Home Page"]

@@ -4,17 +4,15 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "parcel": "parcel serve index.html --no-cache",
-    "json": "json-server --watch db.json --routes routes.json",
-    "start": "concurrently --kill-others \"npm run parcel\" \"npm run json\""
+    "elm": "elm-app start",
+    "json": "json-server --watch db.json --routes routes.json --port 1234",
+    "start": "concurrently --kill-others \"npm run elm\" \"npm run json\""
   },
   "author": "",
   "license": "ISC",
   "devDependencies": {
     "concurrently": "^3.5.1",
-    "json-server": "^0.12.1",
-    "node-sass": "^4.7.2",
-    "parcel-bundler": "^1.6.2",
-    "parcel-plugin-elm": "^0.1.2-alpha"
+    "create-elm-app": "^1.10.3",
+    "json-server": "^0.12.1"
   }
 }
