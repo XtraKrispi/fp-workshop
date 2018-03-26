@@ -1,5 +1,43 @@
 {
-  "publishers": [],
-  "developers": [],
+  "publishers": [
+    {
+      "id": 1,
+      "name": "Nintendo",
+      "location": "Kyoto, Japan",
+      "lastModifiedDate": "2018-01-01"
+    },
+    {
+      "id": 2,
+      "name": "Ubisoft",
+      "location": "Montreuil-sous-Bois, France",
+      "lastModifiedDate": "2018-01-01"
+    },
+    {
+      "id": 3,
+      "name": "Bethesda Softworks",
+      "location": "Rockville, Maryland",
+      "lastModifiedDate": "2018-01-01"
+    }
+  ],
+  "developers": [
+    {
+      "id": 1,
+      "name": "Nintendo",
+      "location": "Kyoto, Japan",
+      "lastModifiedDate": "2018-01-01"
+    },
+    {
+      "id": 2,
+      "name": "Ubisoft",
+      "location": "Montreuil-sous-Bois, France",
+      "lastModifiedDate": "2018-01-01"
+    },
+    {
+      "id": 3,
+      "name": "Bethesda Game Studios",
+      "location": "Rockville, Maryland",
+      "lastModifiedDate": "2018-01-01"
+    }
+  ],
   "games": []
 }
