@@ -5,18 +5,25 @@ import Html.Attributes exposing (href, class)
 import Bootstrap.Grid as Grid
 import Bootstrap.Navbar as Navbar
 import Color
-import Navigation exposing (program, Location)
+import Navigation exposing (programWithFlags, Location)
 import Routes as Routes exposing (Route)
 import Page.Home as Home
 import Page.Developers as Developers
 import Page.Publishers as Publishers
 import Page.Games as Games
 import Ports
+import Types exposing (BaseUrl)
 
 
 type alias Model =
-    { navbarState : Navbar.State
+    { config : Config
+    , navbarState : Navbar.State
     , currentPage : Page
+    }
+
+
+type alias Config =
+    { baseUrl : BaseUrl
     }
 
 
@@ -45,21 +52,22 @@ type NavPage
     | GamesNav
 
 
-main : Program Never Model Msg
+main : Program Config Model Msg
 main =
-    program (Routes.fromLocation >> ChangeRoute) { init = init, update = update, subscriptions = subscriptions, view = view }
+    programWithFlags (Routes.fromLocation >> ChangeRoute) { init = init, update = update, subscriptions = subscriptions, view = view }
 
 
-init : Location -> ( Model, Cmd Msg )
-init location =
+init : Config -> Location -> ( Model, Cmd Msg )
+init config location =
     let
         ( navbarState, navbarCmd ) =
             Navbar.initialState NavbarMsg
 
         ( page, pageCmd, pageTitle ) =
-            setRoute (Routes.fromLocation location)
+            setRoute config (Routes.fromLocation location)
     in
-        { navbarState = navbarState, currentPage = page } ! [ navbarCmd, pageCmd, Ports.setPageTitle pageTitle ]
+        { config = config, navbarState = navbarState, currentPage = page }
+            ! [ navbarCmd, pageCmd, Ports.setPageTitle pageTitle ]
 
 
 subscriptions : Model -> Sub Msg
@@ -76,7 +84,7 @@ update msg model =
         ChangeRoute mRoute ->
             let
                 ( page, cmd, title ) =
-                    setRoute mRoute
+                    setRoute model.config mRoute
             in
                 { model | currentPage = page } ! [ cmd, Ports.setPageTitle title ]
 
@@ -129,8 +137,8 @@ update msg model =
                     model ! []
 
 
-setRoute : Maybe Route -> ( Page, Cmd Msg, String )
-setRoute mRoute =
+setRoute : Config -> Maybe Route -> ( Page, Cmd Msg, String )
+setRoute config mRoute =
     let
         getTitle title =
             "VgDB | " ++ title
@@ -142,7 +150,7 @@ setRoute mRoute =
             Just (Routes.Home) ->
                 let
                     ( model, cmd ) =
-                        Home.init
+                        Home.init config
                 in
                     ( Home model, Cmd.map HomePageMsg cmd, getTitle "Home" )
 
