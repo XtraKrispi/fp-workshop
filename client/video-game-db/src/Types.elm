@@ -5,6 +5,7 @@ import Json.Decode as Decode exposing (Decoder, int, string)
 import Json.Decode.Pipeline exposing (..)
 import Utils exposing (date)
 
+
 type alias BaseUrl =
     String
 
@@ -17,38 +18,43 @@ type alias BasicInfo =
     }
 
 
-type alias Developer = BasicInfo
+type alias Developer =
+    BasicInfo
 
 
-type alias Publisher = BasicInfo
+type alias Publisher =
+    BasicInfo
 
 
-type From
-    = From Int
+type alias Game =
+    { id : Int
+    , title : String
+    , yearPublished : Int
+    , minPlayers : Int
+    , maxPlayers : Int
+    , publisher : Publisher
+    , developer : Developer
+    , lastModifiedDate : Date
+    }
 
-
-type To
-    = To Int
-
-
-type Range
-    = Range From To
-
-
-type Game
-    = Game
-        { id : Int
-        , title : String
-        , numberOfPlayers : Range
-        , publisher : Publisher
-        , developer : Developer
-        , lastModifiedDate : Date
-        }
 
 basicInfoDecoder : Decoder BasicInfo
 basicInfoDecoder =
     decode BasicInfo
         |> required "id" int
-        |> required "name" string 
+        |> required "name" string
         |> required "location" string
+        |> required "lastModifiedDate" date
+
+
+gameDecoder : Decoder Game
+gameDecoder =
+    decode Game
+        |> required "id" int
+        |> required "title" string
+        |> required "yearPublished" int
+        |> required "minPlayers" int
+        |> required "maxPlayers" int
+        |> required "publisher" basicInfoDecoder
+        |> required "developer" basicInfoDecoder
         |> required "lastModifiedDate" date
