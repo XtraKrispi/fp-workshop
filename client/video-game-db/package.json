@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "elm": "elm-app start",
-    "json": "json-server --watch db.json --routes routes.json --port 1234",
+    "json": "json-server --watch db.json --routes routes.json --port 1234 --delay 1000",
     "start": "concurrently --kill-others \"npm run elm\" \"npm run json\""
   },
   "author": "",

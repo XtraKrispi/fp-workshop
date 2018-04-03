@@ -39,5 +39,26 @@
       "lastModifiedDate": "2018-01-01"
     }
   ],
-  "games": []
+  "games": [
+    {
+      "id": 1,
+      "title": "Super Smash Bros. Wii U",
+      "yearPublished": 2014,
+      "minPlayers": 1,
+      "maxPlayers": 8,
+      "publisher": {
+        "id": 1,
+        "name": "Nintendo",
+        "location": "Kyoto, Japan",
+        "lastModifiedDate": "2018-01-01"
+      },
+      "developer": {
+        "id": 1,
+        "name": "Nintendo",
+        "location": "Kyoto, Japan",
+        "lastModifiedDate": "2018-01-01"
+      },
+      "lastModifiedDate": "2018-01-01"
+    }
+  ]
 }
