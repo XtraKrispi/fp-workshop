@@ -38,6 +38,11 @@ type alias Game =
     }
 
 
+
+-- These decoders use the elm-decode-pipeline package to describe how to turn
+-- json into Elm types
+
+
 basicInfoDecoder : Decoder BasicInfo
 basicInfoDecoder =
     decode BasicInfo
