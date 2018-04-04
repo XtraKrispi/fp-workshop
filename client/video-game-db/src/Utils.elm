@@ -10,9 +10,19 @@ type alias HtmlElement msg =
     List (Html.Attribute msg) -> List (Html.Html msg) -> Html.Html msg
 
 
+
+-- Uses bootstrap classes to create a center aligned element.  We abstract away
+-- the Html element type as HtmlElement so we maintain a similar signature to
+-- regular Elm html elements
+
+
 centered : HtmlElement msg -> List (Html.Attribute msg) -> List (Html.Html msg) -> Html.Html msg
 centered elem a h =
     elem (a ++ [ class "text-center" ]) h
+
+
+
+-- Decoder for dates. There isn't one built in, so we make our own here
 
 
 date : Decoder Date
@@ -27,6 +37,10 @@ date =
                     Decode.fail "Invalid date"
         )
         Decode.string
+
+
+
+-- Loading indicator Html element
 
 
 loadingIndicator : Html msg
