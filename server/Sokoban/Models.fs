@@ -1,13 +1,17 @@
 namespace Models
 
-type Cell = 
+type CellType = 
     | Empty
     | Player
     | Wall
     | Box
     | DropPoint
 
-type GameBoard = (Cell list) list
+type Position = int * int
+
+type Cell = CellType * Position
+
+type GameBoard = Cell []
 
 type Action = 
     | MoveUp 

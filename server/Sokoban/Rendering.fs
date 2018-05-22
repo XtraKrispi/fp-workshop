@@ -4,17 +4,16 @@ open Models
 open Game
 open System
 
-let renderRow = List.iter (convertFromCell >> printf "%c")
-
-let nextLine () = 
-    Console.CursorTop <- Console.CursorTop + 1
-    Console.CursorLeft <- 0
+let renderCell (cellType, (row, col)) =
+    Console.CursorLeft <- col
+    Console.CursorTop <- row
+    printf "%c" (convertFromCellType cellType)
 
 let renderBoard level board =
     printf "Level %d" level
-    nextLine ()
+    Console.CursorTop <- 1
     board 
-    |> List.iter (renderRow >> nextLine)
+    |> Array.iter renderCell
 
 let render (gameState : GameState) : unit =
     Console.Clear ()

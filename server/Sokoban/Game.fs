@@ -3,7 +3,7 @@ module Game
 open System.IO
 open Models
 
-let convertToCell (ch : char) : Cell =
+let convertToCellType (ch : char) : CellType =
     match ch with
     | '#' -> Wall
     | '@' -> Player
@@ -11,7 +11,10 @@ let convertToCell (ch : char) : Cell =
     | '.' -> DropPoint 
     | _   -> Empty
 
-let convertFromCell (cell : Cell) : char =
+let convertToCell (ch : char) pos : Cell =
+    convertToCellType ch, pos
+
+let convertFromCellType (cell : CellType) : char =
     match cell with
     | Wall -> '#'
     | Player -> '@'
@@ -19,16 +22,17 @@ let convertFromCell (cell : Cell) : char =
     | DropPoint -> '.'
     | Empty -> ' '
 
-let convertToCells (str : string) : Cell list =
+let convertToCells (str : string) (row : int) : Cell [] =
     str
-    |> Seq.map convertToCell
-    |> Seq.toList
+    |> Seq.indexed
+    |> Seq.map (fun (i, ch) -> convertToCell ch (row, i))
+    |> Seq.toArray
 
 let loadGameBoard (level : Level) : GameBoard =
     let rawData = File.ReadAllLines (Path.Combine("Levels", sprintf "Level%d" level))
     rawData
-    |> Array.map convertToCells
-    |> Array.toList
+    |> Array.indexed
+    |> Array.collect (fun (row, str) -> convertToCells str row)
 
 
 let initState () : GameState =
