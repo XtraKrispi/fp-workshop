@@ -12,7 +12,7 @@ let convertToCellType (ch : char) : CellType =
     | _   -> Empty
 
 let convertToCell (ch : char) pos : Cell =
-    convertToCellType ch, pos
+    pos, convertToCellType ch
 
 let convertFromCellType (cell : CellType) : char =
     match cell with
@@ -22,7 +22,7 @@ let convertFromCellType (cell : CellType) : char =
     | DropPoint -> '.'
     | Empty -> ' '
 
-let convertToCells (str : string) (row : int) : Cell [] =
+let convertToCells (str : string) (row : int) : Cell[] =
     str
     |> Seq.indexed
     |> Seq.map (fun (i, ch) -> convertToCell ch (row, i))
@@ -33,12 +33,23 @@ let loadGameBoard (level : Level) : GameBoard =
     rawData
     |> Array.indexed
     |> Array.collect (fun (row, str) -> convertToCells str row)
+    |> Array.fold (fun map (pos, cellType) -> Map.add pos cellType map) Map.empty
 
+let getPlayerPosition (gameBoard : GameBoard) : Position option =
+    Map.tryPick (fun pos cellType -> if cellType = Player then Some pos else None) gameBoard
 
 let initState () : GameState =
-   Playing (1, loadGameBoard 1)
+    let initialBoard = loadGameBoard 1
+    Playing (1, initialBoard, initialBoard)
 
-let step (action : Action) (gameState : GameState) = 
+let step (action : Action) (gameState : GameState) : GameState * ContinuationStatus = 
     match (action, gameState) with
-    | (QuitGame, Playing (level, _)) -> GameOver level
-    | _ -> gameState 
+    | (QuitGame, Playing (level, _, _)) -> GameOver level, Terminate
+    | (MoveRight, Playing (level, board, initialBoard)) ->
+        match getPlayerPosition board with
+        | Some (row, col) ->
+            let nextPos = row, col + 1
+            let board' = Map.add (row, col) Empty board
+            Playing (level, Map.add nextPos Player board', initialBoard), Continue
+        | None -> gameState, Continue
+    | _ -> gameState, Continue

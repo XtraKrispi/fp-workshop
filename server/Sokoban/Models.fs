@@ -9,10 +9,12 @@ type CellType =
 
 type Position = int * int
 
-type Cell = CellType * Position
+type Cell = Position * CellType
 
-type GameBoard = Cell []
+type ContinuationStatus = | Continue | Terminate
 
+type GameBoard = Map<Position, CellType>
+type InitialGameBoard = GameBoard
 type Action = 
     | MoveUp 
     | MoveDown
@@ -25,7 +27,7 @@ type Level = int
 
 type GameState = 
     | NotStarted
-    | Playing of Level * GameBoard
+    | Playing of Level * GameBoard * InitialGameBoard
     | LevelFinished of Level
     | GameOver of Level
     

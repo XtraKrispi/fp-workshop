@@ -17,18 +17,19 @@ let rec nextAction () =
     | _ -> nextAction ()
 
 let rec gameLoop (state : GameState) : unit = 
-    render state
     let action = nextAction ()
-    let newState = step action state 
+    let newState, continuationStatus = step action state 
     render newState
-    match newState with
-    | GameOver _ -> ()
-    | _ -> gameLoop newState
+    match continuationStatus with
+    | Terminate -> ()
+    | Continue -> gameLoop newState
 
 [<EntryPoint>]
 let main _ =
     Console.CursorVisible <- false
     let initialState = initState ()
+    render initialState
     gameLoop initialState
+    printfn ""
     Console.CursorVisible <- true
     0 // return an integer exit code

@@ -4,7 +4,7 @@ open Models
 open Game
 open System
 
-let renderCell (cellType, (row, col)) =
+let renderCell (row, col) cellType =
     Console.CursorLeft <- col
     Console.CursorTop <- row
     printf "%c" (convertFromCellType cellType)
@@ -13,7 +13,7 @@ let renderBoard level board =
     printf "Level %d" level
     Console.CursorTop <- 1
     board 
-    |> Array.iter renderCell
+    |> Map.iter renderCell
 
 let render (gameState : GameState) : unit =
     Console.Clear ()
@@ -22,6 +22,6 @@ let render (gameState : GameState) : unit =
     match gameState with
     | NotStarted -> 
         printf "Press Space to Start..."
-    | Playing (level, board) -> 
+    | Playing (level, board, _) -> 
         renderBoard level board
     | _ -> printf "Not implemented"
