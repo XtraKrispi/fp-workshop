@@ -5,7 +5,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="Models/Publisher.fs" />
+    <Compile Include="Models.fs" />
     <Compile Include="Controllers/PublishersController.fs" />
     <Compile Include="Startup.fs" />
     <Compile Include="Program.fs" />
