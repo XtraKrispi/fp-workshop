@@ -3,3 +3,5 @@ group Server
     Saturn
     Fable.JsonConverter
     Microsoft.DotNet.Watcher.Tools
+    Dapper
+    System.Data.SQLite.Core

@@ -5,6 +5,8 @@ group Server
     nuget FSharp.Core
     nuget Saturn
     nuget Fable.JsonConverter
+    nuget Dapper
+    nuget System.Data.SQLite.Core
 
     clitool Microsoft.DotNet.Watcher.Tools
 
