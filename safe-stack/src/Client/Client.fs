@@ -9,8 +9,6 @@ open Fable.PowerPack.Fetch
 
 open Shared
 
-open Fulma
-
 
 type Model = Counter option
 
@@ -18,8 +16,6 @@ type Msg =
 | Increment
 | Decrement
 | Init of Result<Counter, exn>
-
-
 
 let init () : Model * Cmd<Msg> =
     let model = None
@@ -51,7 +47,6 @@ let safeComponents =
             "Saturn", "https://saturnframework.github.io/docs/"
             "Fable", "http://fable.io"
             "Elmish", "https://elmish.github.io/elmish/"
-            "Fulma", "https://mangelmaxime.github.io/Fulma"
         ]
         |> List.map (fun (desc,link) -> a [ Href link ] [ str desc ] )
         |> intersperse (str ", ")
@@ -66,31 +61,65 @@ let show = function
 | Some x -> string x
 | None -> "Loading..."
 
-let button txt onClick =
-    Button.button
-        [ Button.IsFullWidth
-          Button.Color IsPrimary
-          Button.OnClick onClick ]
-        [ str txt ]
-
 let view (model : Model) (dispatch : Msg -> unit) =
-    div []
-        [ Navbar.navbar [ Navbar.Color IsPrimary ]
-            [ Navbar.Item.div [ ]
-                [ Heading.h2 [ ]
-                    [ str "SAFE Template" ] ] ]
-
-          Container.container []
-              [ Content.content [ Content.Modifiers [ Modifier.TextAlignment (Screen.All, TextAlignment.Centered) ] ]
-                    [ Heading.h3 [] [ str ("Press buttons to manipulate counter: " + show model) ] ]
-                Columns.columns []
-                    [ Column.column [] [ button "-" (fun _ -> dispatch Decrement) ]
-                      Column.column [] [ button "+" (fun _ -> dispatch Increment) ] ] ]
-
-          Footer.footer [ ]
-                [ Content.content [ Content.Modifiers [ Modifier.TextAlignment (Screen.All, TextAlignment.Centered) ] ]
-                    [ safeComponents ] ] ]
-
+    div [] [ 
+        section [ Class "todoapp"] [ 
+            header [Class "header"] [
+                h1 [] [str "todos"]
+                input [Class "new-todo"; Placeholder "What needs to be done?"; AutoFocus true]
+            ]
+            section [Class "main"] [
+                input [Id "toggle-all"; Class "toggle-all"; Type "checkbox"]
+                label [ HtmlFor "toggle-all"] [ str "Mark all as complete"]
+                ul [ Class "todo-list"] [
+                    // These are here just to show the structure of the list items
+                    // List items should get the class `editing` when editing and `completed` when marked as completed
+                    li [Class "completed"] [
+                        div [Class "view"] [
+                            input [Class "toggle"; Type "checkbox"; Checked true]
+                            label [] [str "Taste Javascript"]
+                            button [Class "destroy"] []
+                        ]
+                        input [Class "edit"; Value "Create a TodoMVC template"]
+                    ]
+                    li [] [
+                        div [Class "view"] [
+                            input [Class "toggle"; Type "checkbox"]
+                            label [] [str "Buy a unicorn"]
+                            button [Class "destroy"] []
+                        ]
+                        input [Class "edit"; Value "Rule the we"]
+                    ]
+                ]
+            ]
+            footer [Class "footer"] [
+                span [Class "todo-count"][
+                    strong [][str "0"]
+                    str " item left"
+                ]
+                ul [ Class "filters" ] [
+                    li [] [ 
+                        a [Class "selected"; Href "#/"] [ str "All"]
+                    ]
+                    li [] [ 
+                        a [Href "#/active"] [ str "Active"]
+                    ]
+                    li [] [ 
+                        a [Href "#/completed"] [ str "Completed"]
+                    ]
+                ]
+            ]
+        ] 
+        footer [ Class "info"] [
+            p [] [str "Double-click to edit a todo"]
+            p [] [ 
+                str "Template by "
+                a [Href "http://sindresorhus.com"] [str "Sindre Sorhus"]
+            ]
+            p [] [str "Created by Goldie"] 
+            safeComponents
+        ]
+    ]
 
 #if DEBUG
 open Elmish.Debug
