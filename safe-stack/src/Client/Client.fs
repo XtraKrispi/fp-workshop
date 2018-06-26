@@ -10,31 +10,55 @@ open Fable.PowerPack.Fetch
 open Shared
 
 
-type Model = Counter option
+type Model = {
+    todos : Todo list
+    newTodoDescription : string
+}
 
 type Msg =
-| Increment
-| Decrement
-| Init of Result<Counter, exn>
+| TodosFetchSuccess of Todo list
+| TodosFetchFail of System.Exception
+| NewTodoDescriptionChange of string
+| CommitNewTodo
+| SaveTodoSuccess of Response
+| SaveTodoFail of System.Exception
+
+let mkTodo description = { todoId = 0
+                           description = description
+                           isComplete = false
+                         }
+
+let getTodos () = Cmd.ofPromise (fetchAs "/api/todos") [] TodosFetchSuccess TodosFetchFail
+
+let saveTodo (todo : Todo) = Cmd.ofPromise (fun t -> postRecord "/api/todos" t []) todo SaveTodoSuccess SaveTodoFail
 
 let init () : Model * Cmd<Msg> =
-    let model = None
-    let cmd =
-        Cmd.ofPromise
-            (fetchAs<int> "/api/init")
-            []
-            (Ok >> Init)
-            (Error >> Init)
-    model, cmd
+    { todos = []
+      newTodoDescription = ""
+    }, getTodos ()
 
 let update (msg : Msg) (model : Model) : Model * Cmd<Msg> =
-    let model' =
-        match model,  msg with
-        | Some x, Increment -> Some (x + 1)
-        | Some x, Decrement -> Some (x - 1)
-        | None, Init (Ok x) -> Some x
-        | _ -> None
-    model', Cmd.none
+    match msg with
+    | TodosFetchSuccess todos -> { model with todos = todos }, Cmd.none
+    | TodosFetchFail ex -> 
+        printfn "Error: %A" ex 
+        model, Cmd.none
+    | NewTodoDescriptionChange s ->
+        { model with 
+            newTodoDescription = s
+        }, Cmd.none
+    | CommitNewTodo ->
+        let todo = mkTodo model.newTodoDescription
+        model, saveTodo todo
+    | SaveTodoSuccess _ ->
+        let todo = mkTodo model.newTodoDescription
+        { model with 
+            newTodoDescription = ""            
+            todos = List.append model.todos [todo]
+        }, Cmd.none
+    | SaveTodoFail ex ->                
+        printfn "Error: %A" ex
+        model, Cmd.none 
 
 let safeComponents =
     let intersperse sep ls =
@@ -57,16 +81,21 @@ let safeComponents =
           str " powered by: "
           components ]
 
-let show = function
-| Some x -> string x
-| None -> "Loading..."
-
 let view (model : Model) (dispatch : Msg -> unit) =
     div [] [ 
         section [ Class "todoapp"] [ 
             header [Class "header"] [
                 h1 [] [str "todos"]
-                input [Class "new-todo"; Placeholder "What needs to be done?"; AutoFocus true]
+                input [ Class "new-todo"
+                        Placeholder "What needs to be done?"
+                        AutoFocus true
+                        OnInput (fun e -> dispatch (NewTodoDescriptionChange e.Value))
+                        Value model.newTodoDescription
+                        OnKeyUp (fun k -> if k.keyCode = 13. then 
+                                                dispatch CommitNewTodo 
+                                             else ()
+                                   )
+                      ]
             ]
             section [Class "main"] [
                 input [Id "toggle-all"; Class "toggle-all"; Type "checkbox"]
